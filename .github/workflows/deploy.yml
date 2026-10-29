@@ -1,0 +1,102 @@
+# ============================================================
+# Publica o front-end (pasta /frontend) no GitHub Pages.
+#
+# Roda sozinho a cada push na branch main que mexa no front-end,
+# ou pelo botão "Run workflow" na aba Actions.
+#
+# Antes da 1ª vez (veja o README):
+#   1. Settings > Pages > Source: "GitHub Actions"
+#   2. Settings > Secrets and variables > Actions > Variables:
+#      crie VITE_API_URL = endereço da API no Render
+#      (ex.: https://intercamp-api.onrender.com, sem barra no fim)
+# ============================================================
+name: Publicar no GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch: # botão "Run workflow"
+
+# Permissões mínimas para publicar no Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Só uma publicação por vez (a nova espera a anterior terminar)
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Testar e gerar o site
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar o Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Rodar os testes
+        run: npm test
+
+      - name: Conferir a variável VITE_API_URL
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        run: |
+          if [ -z "$VITE_API_URL" ]; then
+            echo "::error::Crie a variável VITE_API_URL em Settings > Secrets and variables > Actions > Variables"
+            exit 1
+          fi
+
+      # O site fica em https://usuario.github.io/NOME-DO-REPO/,
+      # então VITE_BASE = /NOME-DO-REPO/ (ou "/" no repo usuario.github.io)
+      - name: Calcular VITE_BASE a partir do nome do repositório
+        env:
+          NOME_DO_REPO: ${{ github.event.repository.name }}
+        run: |
+          if [[ "$NOME_DO_REPO" == *.github.io ]]; then
+            echo "VITE_BASE=/" >> "$GITHUB_ENV"
+          else
+            echo "VITE_BASE=/$NOME_DO_REPO/" >> "$GITHUB_ENV"
+          fi
+
+      - name: Gerar o site (vite build)
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        run: npm run build
+
+      - name: Preparar o GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Enviar a pasta dist
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    name: Publicar
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.publicacao.outputs.page_url }}
+    steps:
+      - name: Publicar no GitHub Pages
+        id: publicacao
+        uses: actions/deploy-pages@v4
