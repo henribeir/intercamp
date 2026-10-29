@@ -1,0 +1,14 @@
+PASTA DOS ESCUDOS DAS TURMAS
+
+1. Salve a imagem do escudo aqui, com o nome da turma em minúsculas e
+   hífen no lugar do espaço. Exemplos:
+     101.png   102.png   200-adm.png   301-int.png
+   Formatos aceitos: png, jpg, webp ou svg. Tamanho ideal: 256 x 300 px,
+   com fundo transparente.
+
+2. Publique o site de novo (commit + push no GitHub: o Actions faz o resto).
+
+3. No app: Mais > Área do mestre > Turmas > Editar > campo "Escudo",
+   escreva:  escudos/301-int.png   e toque em Salvar.
+
+Sem imagem, o app desenha um escudo com o número e o curso da turma.

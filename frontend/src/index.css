@@ -1,0 +1,88 @@
+/* ============================================================
+   InterCamp - estilos globais e tokens do design (tema escuro)
+   Tailwind v4: as cores definidas em @theme viram classes.
+   Ex.: --color-superficie -> bg-superficie, border-superficie...
+   ============================================================ */
+@import "tailwindcss";
+
+@theme {
+  /* Cores do mockup */
+  --color-fundo: #070b14;
+  --color-superficie: #0e1626;
+  --color-superficie-2: #15203a; /* itens elevados: abas, chips */
+  --color-borda: #1b2740;
+  --color-primaria: #2563eb;
+  --color-primaria-clara: #60a5fa;
+  --color-ao-vivo: #ef4444;
+  --color-sucesso: #22c55e;
+  --color-alerta: #facc15;
+  --color-texto: #f1f5f9;
+  --color-texto-2: #94a3b8;
+
+  /* Fontes: Inter nos textos, Barlow Condensed em placares e títulos */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Barlow Condensed", "Inter", system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    background: var(--color-fundo);
+    color: var(--color-texto);
+    -webkit-tap-highlight-color: transparent; /* sem "flash" azul ao tocar no celular */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Foco visível para quem navega pelo teclado */
+  :focus-visible {
+    outline: 2px solid var(--color-primaria-clara);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Números do placar com a mesma largura (não "pulam" ao mudar) */
+  .numeros-fixos {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  /* Lista rolável na horizontal sem barra de rolagem aparente */
+  .rolagem-horizontal {
+    overflow-x: auto;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+  }
+  .rolagem-horizontal::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Texto na cor da competição (--cor), clareada para ter contraste
+     sobre o fundo escuro. Ex.: style={{ '--cor': competicao.cor }} */
+  .texto-cor {
+    color: color-mix(in srgb, var(--cor) 55%, white);
+  }
+
+  /* Espaço para a barra inferior + área segura do iPhone */
+  .espaco-barra-inferior {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* Quem pede "menos movimento" no sistema não vê animações */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
